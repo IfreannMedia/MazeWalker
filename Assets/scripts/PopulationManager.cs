@@ -11,6 +11,7 @@ public class PopulationManager : MonoBehaviour
     public static float elapsed = 0;
     public float trialTime = 5;
     int generation = 1;
+    public bool preferDistanceToTarget;
 
     GUIStyle guiStyle = new GUIStyle();
 
@@ -30,10 +31,7 @@ public class PopulationManager : MonoBehaviour
     {
         for (int i = 0; i < populationSize; i++)
         {
-            //Vector3 startingPos = new Vector3(transform.position.x + Random.Range(-2, 2),
-            //    transform.position.y, transform.position.z + Random.Range(-2, 2));
-            //Debug.Log(startingPos);
-            GameObject b = Instantiate(botPrefab, transform.position, Quaternion.identity);
+            GameObject b = Instantiate(botPrefab, transform.position, transform.rotation);
             b.GetComponent<Brain>().Init();
             population.Add(b);
         }
@@ -41,8 +39,6 @@ public class PopulationManager : MonoBehaviour
 
     GameObject Breed(GameObject parent1, GameObject parent2)
     {
-        //Vector3 startingPos = new Vector3(transform.position.x + Random.Range(-2, 2),
-        //    transform.position.y, transform.position.z + Random.Range(-2, 2));
         GameObject offspring = Instantiate(botPrefab, transform.position, transform.rotation);
         Brain b = offspring.GetComponent<Brain>();
         if (Random.Range(0, 100) == 1)
@@ -60,8 +56,18 @@ public class PopulationManager : MonoBehaviour
 
     private void BreedNewPopulation()
     {
-        List<GameObject> sortedList = population.OrderBy(o =>
-        o.GetComponent<Brain>().distanceTravelled).ToList();
+        List<GameObject> sortedList;
+        if (preferDistanceToTarget)
+        {
+            sortedList = population.OrderByDescending(o =>
+                            o.GetComponent<Brain>().distanceFromGoal).ToList();
+        }
+        else
+        {
+            sortedList = population.OrderBy(o =>
+                            o.GetComponent<Brain>().distanceTravelled).ToList();
+        }
+
         population.Clear();
         for (int i = (int)(sortedList.Count / 2.0f) - 1; i < sortedList.Count - 1; i++)
         {
